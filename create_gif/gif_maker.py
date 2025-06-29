@@ -1,25 +1,43 @@
-# Oct 24, 24
-
 import os
 from PIL import Image
 
-im_path = "./images/"
+img_path = "./images/"
 output_path = "./out/"
 
-# For effective GIF
-# Images should be the same size
+
 def createGIF():
-    output_name = input("Enter out name: ")
-    output_speed = input("Enter speed of animation in milliseconds: ")
-    output_loop = input("Enter loop type:") # 0 <= number <= 65535
-    # 0 infinite, 1 and greater is limited looping
+    output_name = input("Enter file name: ")
+    output_speed = input("Enter length of GIF: ")
+    output_loop = input("Enter loop type (infinite 0 / finite 1): ") 
 
-    im_list = os.listdir(im_path)
+    loop_type = 0 # default
+    if (output_loop == "finite" or output_loop == "1"):
+        loop_type = 1
+    elif (output_loop == "infinite" or output_loop == "0"):
+        loop_type = 0
 
-    ims = [Image.open(im_path + filename) for filename in im_list] # assuming all are images
+    img_list = os.listdir(img_path)
 
-    ims[0].save(output_path + output_name + ".gif", save_all=True, append_images=ims[1:], duration=float(output_speed), loop=int(output_loop))
+    img_names = []
+    for file_name in img_list:
+        img_names.append(file_name)
+    
+    img_names.sort()
 
+    # convert to seconds per frame
+    loop_speed = (float(output_speed) / len(img_names)) * 1000 # convert to ms
+
+    if (loop_speed > 65535):
+        print("Sorry, per frame limit is 65535 ms ")
+        return
+    
+    imgs = []
+    for file_name in img_names:
+        imgs.append(Image.open(img_path + file_name))
+
+    print("creating gif...")
+    imgs[0].save(output_path + output_name + ".gif", save_all=True, append_images=imgs[1:], duration=loop_speed, loop=loop_type)
+    print("done!")
 
     
 
